@@ -1,0 +1,9 @@
+Dsp132 - TODOs
+===============
+
+Current status - Manager creates workers (i.e. setup instances, and activate jars), and working fine with queues.
+
+
+1. Rmove all hardcoded details, base all on inputs and LocalApp (queues names, s3 bucket + keys names, jars).
+2. Deal with cases when Manager is not terminated (i.e. reboot manager in order to make sure it will run the script).
+3. Note that jar needs to be compiled with 1.6 jdk, in order to run properly on remote machines!
