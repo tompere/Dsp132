@@ -333,6 +333,15 @@ public class Manager {
 		// for DEBUG
 		ans += "touch /home/ec2-user/debug.txt" + "\n";
 		
+		// get Asprise OCR library
+		ans += "wget http://download.asprise.net/software/ocr-v4/Asprise-OCR-Java-Linux_x86_32bit-4.0.zip " +
+				"> /home/ec2-user/Asprise-OCR.zip" + "\n";
+		ans += "unzip -d /home/ec2-user/ /home/ec2-user/Asprise-OCR.zip" + "\n";
+		
+		// set Asprise OCR in library path
+		// export LD_LIBRARY_PATH=OCR_HOME:$LD_LIBRARY_PATH
+		ans += "export LD_LIBRARY_PATH=`/home/ec2-user/Asprise-OCR`:$LD_LIBRARY_PATH" + "\n";
+		
 		// execute jar
 		ans += "java -jar /home/ec2-user/" + target + ".jar " + "/home/ec2-user/debug.txt" + "\n";
 		
