@@ -42,7 +42,7 @@ public class LocalApp {
 	private static AmazonEC2 ec2;
 	private static AmazonS3 s3;
 	private static AmazonSQS sqs;
-	private static String imagesURLlist = "input_urls_list.txt";
+	private static String imagesURLlist = "text.images2.txt";
 	private static String resultLocationName;
 	private static int numberArgs; 
 	
@@ -85,25 +85,13 @@ public class LocalApp {
 		// Retrieve the manager instance from EC2
 		getInstance("Manager");
 		
-		// help thread that sleeps
-		Runnable sleeper = new Runnable(){
-		    public void run(){
-		        try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {
-					System.out.println("problem sleeping...");
-					e.printStackTrace();
-				}
-		    }
-		};
-		
 		// wait to receive done message from manager via SQS
 		String queueMsg = getMessageAndDelete(taskDoneQueue);
 		while (queueMsg == "")
 		{
 			// do nothing and sleep
 			queueMsg = getMessageAndDelete(taskDoneQueue);
-			sleeper.run();
+			Thread.sleep(3000);
 		}
 		
 		resultLocationName = queueMsg;
@@ -197,7 +185,7 @@ public class LocalApp {
 		// execute jar
 		ans += "java -jar /home/ec2-user/" + target + ".jar " + "\n";
 		
-		System.out.println(ans);
+		// System.out.println(ans);
 
 		return new String(Base64.encodeBase64(ans.getBytes()));
 	}

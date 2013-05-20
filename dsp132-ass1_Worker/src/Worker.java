@@ -35,6 +35,7 @@ public class Worker {
 		String managerQueue = "https://sqs.us-east-1.amazonaws.com/152554501442/done_image_task_queue";
 		
 		logger = new PrintWriter("/home/ec2-user/worker-logs.log", "UTF-8");
+		
 		loggerWrapper("Worker started.");
 		
 		ReceiveMessageRequest receiveMessageRequest;
