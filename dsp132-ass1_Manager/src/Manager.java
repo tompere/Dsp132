@@ -178,65 +178,6 @@ public class Manager {
 		
 		loggerWrapper("Done message with location (" + resultLocationName + ") was sent to queue");
 		
-		try {
-			/*			// Create a queue
-			loggerWrapper("Creating a new SQS queue called MyQueue.\n");
-			CreateQueueRequest createQueueRequest = new CreateQueueRequest("MyQueue"+ UUID.randomUUID());
-			String myQueueUrl = sqs.createQueue(createQueueRequest).getQueueUrl();
-
-			// List queues
-			loggerWrapper("Listing all queues in your account.\n");
-			for (String queueUrl : sqs.listQueues().getQueueUrls()) {
-				loggerWrapper("  QueueUrl: " + queueUrl);
-			}
-			loggerWrapper();
-
-			// Send a message
-			loggerWrapper("Sending a message to MyQueue.\n");
-			sqs.sendMessage(new SendMessageRequest(myQueueUrl, "This is my message text."));
-
-			// Receive messages
-			loggerWrapper("Receiving messages from MyQueue.\n");
-			ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(myQueueUrl);
-			List<Message> messages = sqs.receiveMessage(receiveMessageRequest).getMessages();
-			for (Message message : messages) {
-				loggerWrapper("  Message");
-				loggerWrapper("    MessageId:     " + message.getMessageId());
-				loggerWrapper("    ReceiptHandle: " + message.getReceiptHandle());
-				loggerWrapper("    MD5OfBody:     " + message.getMD5OfBody());
-				loggerWrapper("    Body:          " + message.getBody());
-				for (Entry<String, String> entry : message.getAttributes().entrySet()) {
-					loggerWrapper("  Attribute");
-					loggerWrapper("    Name:  " + entry.getKey());
-					loggerWrapper("    Value: " + entry.getValue());
-				}
-			}
-			loggerWrapper();
-
-			// Delete a message
-//			loggerWrapper("Deleting a message.\n");
-//			String messageRecieptHandle = messages.get(0).getReceiptHandle();
-//			sqs.deleteMessage(new DeleteMessageRequest(myQueueUrl, messageRecieptHandle));
-
-			// Delete a queue
-//			loggerWrapper("Deleting the test queue.\n");
-//			sqs.deleteQueue(new DeleteQueueRequest(myQueueUrl));
-			 */		
-			} catch (AmazonServiceException ase) {
-				 loggerWrapper("Caught an AmazonServiceException, which means your request made it " +
-						 "to Amazon SQS, but was rejected with an error response for some reason.");
-				 loggerWrapper("Error Message:    " + ase.getMessage());
-				 loggerWrapper("HTTP Status Code: " + ase.getStatusCode());
-				 loggerWrapper("AWS Error Code:   " + ase.getErrorCode());
-				 loggerWrapper("Error Type:       " + ase.getErrorType());
-				 loggerWrapper("Request ID:       " + ase.getRequestId());
-			 } catch (AmazonClientException ace) {
-				 loggerWrapper("Caught an AmazonClientException, which means the client encountered " +
-						 "a serious internal problem while trying to communicate with SQS, such as not " +
-						 "being able to access the network.");
-				 loggerWrapper("Error Message: " + ace.getMessage());
-			 }
-		
 		logger.close();
 	}
 	
@@ -343,7 +284,7 @@ public class Manager {
 		ans += "export LD_LIBRARY_PATH=`/home/ec2-user/Asprise-OCR`:$LD_LIBRARY_PATH" + "\n";
 		
 		// execute jar
-		ans += "java -jar /home/ec2-user/" + target + ".jar " + "/home/ec2-user/debug.txt" + "\n";
+		ans += "java -jar /home/ec2-user/" + target + ".jar " + "\n";
 		
 		loggerWrapper("Worker script is " + "\n" + ans + "===========================");
 		

@@ -77,24 +77,6 @@ public class Worker {
 			
 		}
 		loggerWrapper("out");
-//		String ans = ""+parsed_image+image_url;
-//		File htmlFile;
-//		String[] splited = ans.split("http://");
-////		loggerWrapper("1 -"+splited[0]+"\n 2- "+splited[1]);
-//		String toAdd = "	<p>\n		<img src=\"http://"+splited[1].replace('\n', ' ')+"\"><br/>\n		"+splited[0]+"\n	</p>";
-//		loggerWrapper("toAdd  = "+toAdd);
-//		htmlFile = new File("myfile.html");
-//		htmlFile.setWritable(true);
-//		try {
-//			BufferedWriter bw = new BufferedWriter(new FileWriter(htmlFile));
-//			bw.write("<html>\n<title>MY OCR</title>\n<body>");
-//			bw.write(toAdd);
-//			bw.write("</body>\n<html>");
-//			bw.close();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 	}
 	
 	private static void loggerWrapper(String msg)
