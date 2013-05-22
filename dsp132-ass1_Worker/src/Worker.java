@@ -31,12 +31,16 @@ public class Worker {
 	public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
 		AWSCredentialsProvider credentialsProvider = new ClasspathPropertiesFileCredentialsProvider();
 		AmazonSQS sqs = new AmazonSQSClient(credentialsProvider);
-		String workersQueue = "https://sqs.us-east-1.amazonaws.com/152554501442/new_image_task_queue";
-		String managerQueue = "https://sqs.us-east-1.amazonaws.com/152554501442/done_image_task_queue";
-		
+
 		logger = new PrintWriter("/home/ec2-user/worker-logs.log", "UTF-8");
-		
 		loggerWrapper("Worker started.");
+		
+		//save queues URL's
+		loggerWrapper("Got " + args.length + "queues");
+		String workersQueue = args[0];//"https://sqs.us-east-1.amazonaws.com/152554501442/new_image_task_queue";
+		String managerQueue = args[1];//"https://sqs.us-east-1.amazonaws.com/152554501442/done_image_task_queue";
+		
+
 		
 		ReceiveMessageRequest receiveMessageRequest;
 		List<Message> messages;

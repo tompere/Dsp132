@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -28,6 +30,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClient;
+import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import com.amazonaws.services.sqs.model.DeleteMessageRequest;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
@@ -44,12 +47,13 @@ public class LocalApp {
 	private static AmazonSQS sqs;
 	private static String imagesURLlist = "text.images2.txt";
 	private static String resultLocationName;
+	private static String localAppQueue,workersQueue,doneImagesQueue,taskDoneQueue;
 	private static int numberArgs; 
 
 	public static void main(String[] args) throws Exception {
 
-		String taskDoneQueue = "https://sqs.us-east-1.amazonaws.com/152554501442/done_task_queue";
-		String localAppQueue = "https://sqs.us-east-1.amazonaws.com/152554501442/new_task_queue";
+//		String taskDoneQueue = "https://sqs.us-east-1.amazonaws.com/152554501442/done_task_queue";
+//		String localAppQueue = "https://sqs.us-east-1.amazonaws.com/152554501442/new_task_queue";
 
 		// Obtain input arguments
 		File inputImagesFile;
@@ -64,7 +68,7 @@ public class LocalApp {
 			return;
 		}
 
-		// Initialize EC2 service
+		// Initialize EC2,S3 and SQS services
 		init();
 
 		// upload the file with the list of images to S3
@@ -90,7 +94,7 @@ public class LocalApp {
 		}
 
 		resultLocationName = queueMsg;
-
+		System.out.println("Got result in "+resultLocationName);
 		// retrieve result object
 		S3Object object = s3.getObject(new GetObjectRequest("testBucketcm_sdlm4er", resultLocationName));
 		try{
@@ -115,19 +119,19 @@ public class LocalApp {
 		ec2 = new AmazonEC2Client(credentialsProvider);
 		s3  = new AmazonS3Client(credentialsProvider);
 		sqs = new AmazonSQSClient(credentialsProvider);
+		createQueues();
 
 	}
 
 	private static Instance createInstance(String tag){
 		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
-
 		runInstancesRequest.withImageId("ami-76f0061f")
-			.withInstanceType("t1.micro")
-			.withMinCount(1)
-			.withMaxCount(1)
-			.withKeyName("ass12")
-			.withSecurityGroups("ssh")
-			.withUserData(createScript("testBucketcm_sdlm4er","manager.jar", "manager"));
+		.withInstanceType("t1.micro")
+		.withMinCount(1)
+		.withMaxCount(1)
+		.withKeyName("ass12")
+		.withSecurityGroups("ssh")
+		.withUserData(createScript("testBucketcm_sdlm4er","manager.jar", "manager"));
 
 		RunInstancesResult runInstancesResult = 
 				ec2.runInstances(runInstancesRequest);
@@ -138,9 +142,9 @@ public class LocalApp {
 		CreateTagsRequest createTagsRequest = new CreateTagsRequest();
 		createTagsRequest.withResources(manager.getInstanceId()).withTags(new Tag("Name",tag));
 		ec2.createTags(createTagsRequest);
-		
+
 		System.out.println("Created a new " + tag + ".");
-		
+
 		return manager;
 	}
 
@@ -178,8 +182,11 @@ public class LocalApp {
 		ans += "chmod 777 /home/ec2-user/manager-logs.log" + "\n";
 
 		// execute jar
-		ans += "java -jar /home/ec2-user/" + target + ".jar " + "\n";
+		ans += "java -jar /home/ec2-user/" + target + ".jar ";
 		
+		//add parameters 
+		ans+= "" + localAppQueue + " " + workersQueue + " " + doneImagesQueue + " " + taskDoneQueue + "\n";
+		System.out.println(ans);
 		return new String(Base64.encodeBase64(ans.getBytes()));
 	}
 
@@ -202,7 +209,7 @@ public class LocalApp {
 		}
 
 		// in case no instance was found - create new instance
-		catch (NullPointerException e){	
+		catch (Exception e){	
 			createInstance(tagName);
 		}
 	}
@@ -250,4 +257,24 @@ public class LocalApp {
 		return ans;
 	}
 
+	private static void createQueues(){
+		try {
+			// Create queues
+			System.out.println("Creating new SQS queues");
+			CreateQueueRequest createQueueRequest = new CreateQueueRequest("new_task"+ UUID.randomUUID());
+			localAppQueue = sqs.createQueue(createQueueRequest).getQueueUrl();			
+			
+			createQueueRequest = new CreateQueueRequest("new_image_task"+ UUID.randomUUID());
+			workersQueue = sqs.createQueue(createQueueRequest).getQueueUrl();
+			
+			createQueueRequest = new CreateQueueRequest("done_image_task"+ UUID.randomUUID());
+			doneImagesQueue = sqs.createQueue(createQueueRequest).getQueueUrl();
+			
+			createQueueRequest = new CreateQueueRequest("done_task"+ UUID.randomUUID());
+			taskDoneQueue = sqs.createQueue(createQueueRequest).getQueueUrl();
+		}catch (Exception e){
+			terminateAppWithMessage("Invalid input.", e);
+			
+		}
+	}
 }
