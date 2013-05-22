@@ -53,23 +53,18 @@ public class Manager {
 	private static int numberArgs;
 	private static String resultLocationName = "Final.html";
 	private static PrintWriter logger;
-	private static String localAppQueue,workersQueue,doneImagesQueue,taskDoneQueue;
-	
+
 	public static void main(String[] args) throws Exception {
 		
-		logger = new PrintWriter("/home/ec2-user/manager-logs.log", "UTF-8");
-		loggerWrapper("Manager started.");
-		
-		//save queues URL's
-		loggerWrapper("Got " + args.length + "queues");
-		
-		localAppQueue = args[0];//"https://sqs.us-east-1.amazonaws.com/152554501442/new_task_queue";
-		workersQueue = args[1];//"https://sqs.us-east-1.amazonaws.com/152554501442/new_image_task_queue";
-		doneImagesQueue = args[2];//"https://sqs.us-east-1.amazonaws.com/152554501442/done_image_task_queue";
-		taskDoneQueue = args[3];//"https://sqs.us-east-1.amazonaws.com/152554501442/done_task_queue";
+		String localAppQueue = "https://sqs.us-east-1.amazonaws.com/152554501442/new_task_queue";
+		String workersQueue = "https://sqs.us-east-1.amazonaws.com/152554501442/new_image_task_queue";
+		String doneImagesQueue = "https://sqs.us-east-1.amazonaws.com/152554501442/done_image_task_queue";
+		String taskDoneQueue = "https://sqs.us-east-1.amazonaws.com/152554501442/done_task_queue";
 		boolean queue_is_empty=false;
 		int messageCount=0;
 		
+		logger = new PrintWriter("/home/ec2-user/manager-logs.log", "UTF-8");
+		loggerWrapper("Manager started.");
 		
 		//Initialize s3 and sqs 
 		init();
@@ -138,7 +133,7 @@ public class Manager {
 			// queue_is_empty = true;
 		}
 
-		loggerWrapper("all done! creating html file\n\n\n\n\n\n\n");
+		loggerWrapper("all done! creating html file");
 		queue_is_empty = false;
 
 		File htmlFile;
@@ -154,8 +149,6 @@ public class Manager {
 			result = sqs.getQueueAttributes(attrRequest).getAttributes();
 			numOfVisible = Integer.parseInt(result.get("ApproximateNumberOfMessages"));
 			numOfNotVisible = Integer.parseInt(result.get("ApproximateNumberOfMessagesNotVisible"));
-			loggerWrapper("there are - " +(numOfVisible + numOfNotVisible)+" messages in the workers's queue "+doneImagesQueue);
-			loggerWrapper("when "+numOfVisible+" are visible, and"+numOfNotVisible+" are NOT");
 			if ((numOfVisible + numOfNotVisible) == 0){
 				queue_is_empty = true;
 			}
@@ -166,7 +159,6 @@ public class Manager {
 					returndAns = returndAns.substring(returndAns.lastIndexOf("('*')." + 1));
 					splitedAns = returndAns.split("http://");
 					String toAdd = "<p>\n<img src=\"http://" + splitedAns[1].replace('\n', ' ')+"\"><br/>\n"+splitedAns[0]+"\n</p>\n\n";
-					loggerWrapper("added - "+toAdd);
 					bw.write(toAdd);
 				}
 			}
@@ -289,10 +281,7 @@ public class Manager {
 		ans += "chmod 777 /home/ec2-user/worker-logs.log" + "\n";
 		
 		// execute jar
-		ans += "java -jar /home/ec2-user/" + target + ".jar ";
-		
-		//add parameters 
-		ans+= ""  + workersQueue + " " + doneImagesQueue + "\n";
+		ans += "java -jar /home/ec2-user/" + target + ".jar " + "\n";
 		
 		loggerWrapper("Worker script is " + "\n" + ans + "===========================");
 		
